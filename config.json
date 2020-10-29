@@ -2,7 +2,7 @@
   "parameters": {
     "text": {
       "defaultValue": {
-        "value": "This should be modified by CI"
+        "value": "This text I modify using only GIT :)"
       }
     }
   },
