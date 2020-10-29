@@ -14,7 +14,7 @@ jobs:
           java-version: 1.8
       - name: Decode secrets.properties file
         env:
-          SECRETS_PROPERTIES: ${{ secrets.KEYS }}
+          KEYS: ${{ secrets.KEYS }}
         run: echo "$KEYS" | base64 -d > secrets.json
       - name: Build with Gradle
         run: ./gradlew test
