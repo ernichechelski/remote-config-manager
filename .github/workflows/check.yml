@@ -1,9 +1,7 @@
 name: Java CI
 
 on:
-  push:
-    branches:
-      - main
+  pull_request
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,4 +17,4 @@ jobs:
           KEYS: ${{ secrets.KEYS }}
         run: echo "$KEYS" | base64 -d > secrets.json
       - name: Build with Gradle
-        run: ./gradlew test --tests PushMasterTests
+        run: ./gradlew test --tests PullRequestTests
