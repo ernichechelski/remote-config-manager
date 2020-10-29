@@ -2,7 +2,7 @@
   "parameters": {
     "text": {
       "defaultValue": {
-        "value": "Hello separate flows XD"
+        "value: "Hello separate flows XD"
       }
     }
   },
