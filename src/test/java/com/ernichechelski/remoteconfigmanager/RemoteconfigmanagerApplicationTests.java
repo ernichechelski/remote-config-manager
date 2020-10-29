@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -27,19 +28,12 @@ class RemoteconfigmanagerApplicationTests {
 		publishTemplate(etag);
 	}
 
-	@Test
-	void contextLoads() throws Exception {
-		getTemplate();
-	}
+//	@Test
+//	void contextLoads() throws Exception {
+//		getTemplate();
+//	}
 
-	/**
-	 * Retrieve a valid access token that can be use to authorize requests to the Remote Config REST
-	 * API.
-	 *
-	 * @return Access token.
-	 * @throws IOException
-	 */
-	// [START retrieve_access_token]
+
 	private static String getAccessToken() throws IOException {
 		GoogleCredential googleCredential = GoogleCredential
 				.fromStream(new FileInputStream("quoteoftheday-7252d-firebase-adminsdk-qe717-fe620dddde.json"))
@@ -47,7 +41,16 @@ class RemoteconfigmanagerApplicationTests {
 		googleCredential.refreshToken();
 		return googleCredential.getAccessToken();
 	}
-	// [END retrieve_access_token]
+
+	private static String getAccessTokenFromEnvironment() throws IOException {
+		String initialString = new String(Base64.getDecoder().decode(System.getenv("KEYS")));
+		GoogleCredential googleCredential = GoogleCredential
+				.fromStream(new ByteArrayInputStream(initialString.getBytes()))
+				.createScoped(Arrays.asList(SCOPES));
+		googleCredential.refreshToken();
+		return googleCredential.getAccessToken();
+	}
+
 
 	/**
 	 * Get current Firebase Remote Config template from server and store it locally.
@@ -267,9 +270,8 @@ class RemoteconfigmanagerApplicationTests {
 	private static HttpURLConnection getCommonConnection(String endpoint) throws IOException {
 		URL url = new URL(endpoint);
 		HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-		httpURLConnection.setRequestProperty("Authorization", "Bearer " + getAccessToken());
+		httpURLConnection.setRequestProperty("Authorization", "Bearer " + getAccessTokenFromEnvironment());
 		httpURLConnection.setRequestProperty("Content-Type", "application/json; UTF-8");
 		return httpURLConnection;
 	}
-
 }
