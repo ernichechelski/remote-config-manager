@@ -2,7 +2,7 @@
   "parameters": {
     "text": {
       "defaultValue": {
-        "value": "Hello Spring"
+        "value": "This should be modified by CI"
       }
     }
   },
