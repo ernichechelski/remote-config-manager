@@ -43,9 +43,8 @@ class RemoteconfigmanagerApplicationTests {
 	}
 
 	private static String getAccessTokenFromEnvironment() throws IOException {
-		String initialString = new String(Base64.getDecoder().decode(System.getenv("KEYS")));
 		GoogleCredential googleCredential = GoogleCredential
-				.fromStream(new ByteArrayInputStream(initialString.getBytes()))
+				.fromStream(new FileInputStream("secrets.properties"))
 				.createScoped(Arrays.asList(SCOPES));
 		googleCredential.refreshToken();
 		return googleCredential.getAccessToken();
