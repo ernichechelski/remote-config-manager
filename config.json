@@ -7,12 +7,12 @@
     }
   },
   "version": {
-    "versionNumber": "7",
-    "updateTime": "2020-10-28T11:35:03.010Z",
+    "versionNumber": "11",
+    "updateTime": "2020-10-29T10:34:18.049Z",
     "updateUser": {
-      "email": "ernichechelski@gmail.com"
+      "email": "firebase-adminsdk-qe717@quoteoftheday-7252d.iam.gserviceaccount.com"
     },
-    "updateOrigin": "CONSOLE",
+    "updateOrigin": "REST_API",
     "updateType": "INCREMENTAL_UPDATE"
   }
 }

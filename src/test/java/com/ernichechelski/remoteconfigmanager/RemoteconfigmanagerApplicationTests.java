@@ -22,22 +22,14 @@ class RemoteconfigmanagerApplicationTests {
 	private final static String[] SCOPES = { "https://www.googleapis.com/auth/firebase.remoteconfig" };
 
 	@Test
-	void uploadConfig() {
-		try {
-			String etag = getTemplateETag();
-			publishTemplate(etag);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	void uploadConfig() throws Exception {
+		String etag = getTemplateETag();
+		publishTemplate(etag);
 	}
 
 	@Test
-	void contextLoads() {
-		try {
-			getTemplate();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	void contextLoads() throws Exception {
+		getTemplate();
 	}
 
 	/**
