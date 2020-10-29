@@ -1,0 +1,18 @@
+{
+  "parameters": {
+    "text": {
+      "defaultValue": {
+        "value": "Hello Spring"
+      }
+    }
+  },
+  "version": {
+    "versionNumber": "7",
+    "updateTime": "2020-10-28T11:35:03.010Z",
+    "updateUser": {
+      "email": "ernichechelski@gmail.com"
+    },
+    "updateOrigin": "CONSOLE",
+    "updateType": "INCREMENTAL_UPDATE"
+  }
+}
