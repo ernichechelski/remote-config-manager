@@ -2,17 +2,8 @@
   "parameters": {
     "text": {
       "defaultValue": {
-        "value": "Hello separate flows XD"
+        "value": "Hello cleaned parameter"
       }
     }
-  },
-  "version": {
-    "versionNumber": "11",
-    "updateTime": "2020-10-29T10:34:18.049Z",
-    "updateUser": {
-      "email": "firebase-adminsdk-qe717@quoteoftheday-7252d.iam.gserviceaccount.com"
-    },
-    "updateOrigin": "REST_API",
-    "updateType": "INCREMENTAL_UPDATE"
   }
 }
