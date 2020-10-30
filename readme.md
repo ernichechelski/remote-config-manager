@@ -56,3 +56,6 @@ public class Config {
 ## Under a hood 🚙
 
 On every pull request gradle runs tests from the `PullRequestTests` class. On every push to the main branch gradle runs tests from the `PushMasterTests`. Of cource you can write any additional logic as you want. 
+
+## Example client
+Of course Firebase needs client application to check fully if it works. Simple project can be found here: https://github.com/ernichechelski/remote-config-manager-ios-client-example/
