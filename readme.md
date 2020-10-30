@@ -59,3 +59,6 @@ On every pull request gradle runs tests from the `PullRequestTests` class. On ev
 
 ## Example client
 Of course Firebase needs client application to check fully if it works. Simple project can be found here: https://github.com/ernichechelski/remote-config-manager-ios-client-example/
+
+## Why it is Spring Boot app?
+I consider a way to expand this project to setup Spring Boot web application which publishes changes on the Remote Config based on some Cron operations :) 
