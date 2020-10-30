@@ -16,7 +16,8 @@ jobs:
         env:
           KEYS: ${{ secrets.KEYS }}
           PROJECT_ID: ${{ secrets.PROJECT_ID }}
-        run: echo "$KEYS" | base64 -d > secrets.json
-             echo "$PROJECT_ID" | base64 -d > projectId.json
+        run: |
+          echo "$KEYS" | base64 -d > secrets.json
+          echo "$PROJECT_ID" | base64 -d > projectId.json
       - name: Build with Gradle
         run: ./gradlew test --tests PullRequestTests
