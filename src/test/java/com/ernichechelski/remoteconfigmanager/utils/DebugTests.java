@@ -8,6 +8,6 @@ public class DebugTests {
 
     @Test
     void downloadConfig() throws Exception {
-        CommonUtils.getTemplate("latest.json");
+        CommonUtils.getAndSaveTemplate("latest.json");
     }
 }

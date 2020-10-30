@@ -1,6 +1,5 @@
 package com.ernichechelski.remoteconfigmanager.utils;
 
-import com.ernichechelski.remoteconfigmanager.Config;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.gson.*;
 import org.json.JSONArray;
@@ -21,198 +20,64 @@ import java.util.zip.GZIPOutputStream;
  */
 public class CommonUtils {
 
-    // By this property entire config is read.
-    private final static Config config = new Config();
-
+    // Based on Firebase documentation.
     private final static String BASE_URL = "https://firebaseremoteconfig.googleapis.com";
 
+    // Based on Firebase documentation.
     private final static String[] SCOPES = { "https://www.googleapis.com/auth/firebase.remoteconfig" };
 
+    // Here should be names for local files with required firebase project secrets.
+    private static String LOCAL_SECRETS_FILENAME =  "secrets.properties";
+
+    // Please reffer to check.yml and upload.yml files after changing this.
+    private static String CI_SECRETS_FILENAME =  "secrets.json";
+
+    // Here should be names for local files with required firebase project id.
+    private static String LOCAL_PROJECT_ID_FILENAME =  "projectId.properties";
+
+    // Please reffer to check.yml and upload.yml files after changing this.
+    private static String CI_PROJECT_ID_FILENAME =  "projectId.json";
+
+    /**
+     * Check if current Config can produce valid JSON.
+     *
+     * @throws IOException
+     */
     public static void checkConfig() throws Exception {
         if (!CommonUtils.isJSONValid(CommonUtils.createConfig())) {
             throw new Exception("Config is not valid JSON!");
         }
     }
 
+    /**
+     * Publish Config class to the to Firebase server.
+     *
+     * @throws IOException
+     */
     public static void publishConfig() throws Exception {
         String etag = CommonUtils.getTemplateETag();
         CommonUtils.publishTemplate(etag);
     }
 
-    private static String getEndpoint() throws IOException {
-        String projectId;
+    private static boolean isJSONValid(String test) {
         try {
-            projectId = getProjectId();
-        } catch (IOException e) {
-            projectId = getProjectIdFromEnvironment();
+            new JSONObject(test);
+        } catch (JSONException ex) {
+            try {
+                new JSONArray(test);
+            } catch (JSONException ex1) {
+                return false;
+            }
         }
-        return "/v1/projects/" + projectId + "/remoteConfig";
-    }
-
-    private static String getAccessToken() throws IOException {
-        GoogleCredential googleCredential = GoogleCredential
-                .fromStream(new FileInputStream("secrets.properties"))
-                .createScoped(Arrays.asList(SCOPES));
-        googleCredential.refreshToken();
-        return googleCredential.getAccessToken();
-    }
-
-    private static String getAccessTokenFromEnvironment() throws IOException {
-        GoogleCredential googleCredential = GoogleCredential
-                .fromStream(new FileInputStream("secrets.json"))
-                .createScoped(Arrays.asList(SCOPES));
-        googleCredential.refreshToken();
-        return googleCredential.getAccessToken();
-    }
-
-    private static String getProjectId() throws IOException {
-        File file = new File("projectId.properties");
-        Scanner scanner = new Scanner(file);
-
-        StringBuilder stringBuilder = new StringBuilder();
-        while (scanner.hasNext()) {
-            stringBuilder.append(scanner.nextLine());
-        }
-        return stringBuilder.toString();
-    }
-
-    private static String getProjectIdFromEnvironment() throws IOException {
-        File file = new File("projectId.json");
-        Scanner scanner = new Scanner(file);
-
-        StringBuilder stringBuilder = new StringBuilder();
-        while (scanner.hasNext()) {
-            stringBuilder.append(scanner.nextLine());
-        }
-        return stringBuilder.toString();
+        return true;
     }
 
     /**
-     * Get current Firebase Remote Config template from server and store it locally.
+     * Publish Config class to the to Firebase server.
      *
      * @throws IOException
      */
-    public static void getTemplate(String filename) throws IOException {
-        HttpURLConnection httpURLConnection = getCommonConnection(BASE_URL + getEndpoint());
-        httpURLConnection.setRequestMethod("GET");
-        httpURLConnection.setRequestProperty("Accept-Encoding", "gzip");
-
-        int code = httpURLConnection.getResponseCode();
-        if (code == 200) {
-            InputStream inputStream = new GZIPInputStream(httpURLConnection.getInputStream());
-            String response = inputstreamToString(inputStream);
-
-            JsonParser jsonParser = new JsonParser();
-            JsonElement jsonElement = jsonParser.parse(response);
-
-            Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-            String jsonStr = gson.toJson(jsonElement);
-
-            File file = new File(filename);
-            PrintWriter printWriter = new PrintWriter(new FileWriter(file));
-            printWriter.print(jsonStr);
-            printWriter.flush();
-            printWriter.close();
-
-            System.out.println("Template retrieved and has been written to config.json");
-
-            // Print ETag
-            String etag = httpURLConnection.getHeaderField("ETag");
-            System.out.println("ETag from server: " + etag);
-        } else {
-            System.out.println(inputstreamToString(httpURLConnection.getErrorStream()));
-        }
-
-    }
-
-    /**
-     * Get current Firebase Remote Config template from server and store it locally.
-     *
-     * @throws IOException
-     */
-    public static String getTemplateETag() throws IOException {
-        HttpURLConnection httpURLConnection = getCommonConnection(BASE_URL + getEndpoint());
-        httpURLConnection.setRequestMethod("GET");
-        httpURLConnection.setRequestProperty("Accept-Encoding", "gzip");
-        int code = httpURLConnection.getResponseCode();
-        if (code == 200) {
-            String etag = httpURLConnection.getHeaderField("ETag");
-            System.out.println("ETag from server: " + etag);
-            return etag;
-        } else {
-            System.out.println(inputstreamToString(httpURLConnection.getErrorStream()));
-            throw new IOException();
-        }
-    }
-
-    /**
-     * Print the last 5 available Firebase Remote Config template metadata from the server.
-     *
-     * @throws IOException
-     */
-    private static void getVersions() throws IOException {
-        HttpURLConnection httpURLConnection = getCommonConnection(BASE_URL + getEndpoint()
-                + ":listVersions?pageSize=5");
-        httpURLConnection.setRequestMethod("GET");
-
-        int code = httpURLConnection.getResponseCode();
-        if (code == 200) {
-            String versions = inputstreamToPrettyString(httpURLConnection.getInputStream());
-            System.out.println("Versions:");
-            System.out.println(versions);
-        } else {
-            System.out.println(inputstreamToString(httpURLConnection.getErrorStream()));
-        }
-    }
-
-    /**
-     * Roll back to an available version of Firebase Remote Config template.
-     *
-     * @param version The version to roll back to.
-     *
-     * @throws IOException
-     */
-    private static void rollback(int version) throws IOException {
-        HttpURLConnection httpURLConnection = getCommonConnection(BASE_URL + getEndpoint()
-                + ":rollback");
-        httpURLConnection.setDoOutput(true);
-        httpURLConnection.setRequestMethod("POST");
-        httpURLConnection.setRequestProperty("Accept-Encoding", "gzip");
-
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("version_number", version);
-
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
-        outputStreamWriter.write(jsonObject.toString());
-        outputStreamWriter.flush();
-        outputStreamWriter.close();
-
-        int code = httpURLConnection.getResponseCode();
-        if (code == 200) {
-            System.out.println("Rolled back to: "  + version);
-            InputStream inputStream = new GZIPInputStream(httpURLConnection.getInputStream());
-            System.out.println(inputstreamToPrettyString(inputStream));
-
-            // Print ETag
-            String etag = httpURLConnection.getHeaderField("ETag");
-            System.out.println("ETag from server: " + etag);
-        } else {
-            System.out.println("Error:");
-            InputStream inputStream = new GZIPInputStream(httpURLConnection.getErrorStream());
-            System.out.println(inputstreamToString(inputStream));
-        }
-    }
-
-    /**
-     * Publish local template to Firebase server.
-     *
-     * @throws IOException
-     */
-    public static void publishTemplate(String etag) throws IOException {
-        publishTemplate(etag, null);
-    }
-
-    private static void publishTemplate(String etag, Config config) throws IOException {
+    private static void publishTemplate(String etag) throws IOException {
         System.out.println("Publishing template...");
         HttpURLConnection httpURLConnection = getCommonConnection(BASE_URL + getEndpoint());
         httpURLConnection.setDoOutput(true);
@@ -232,10 +97,72 @@ public class CommonUtils {
         if (code == 200) {
             System.out.println("Template has been published.");
         } else {
-            System.out.println(inputstreamToString(httpURLConnection.getErrorStream()));
+            System.out.println(inputStreamToString(httpURLConnection.getErrorStream()));
         }
     }
 
+    /**
+     * Get current Firebase Remote Config template from server and store it locally.
+     *
+     * @throws IOException
+     */
+    public static void getAndSaveTemplate(String filename) throws IOException {
+        HttpURLConnection httpURLConnection = getCommonConnection(BASE_URL + getEndpoint());
+        httpURLConnection.setRequestMethod("GET");
+        httpURLConnection.setRequestProperty("Accept-Encoding", "gzip");
+
+        int code = httpURLConnection.getResponseCode();
+        if (code == 200) {
+            InputStream inputStream = new GZIPInputStream(httpURLConnection.getInputStream());
+            String response = inputStreamToString(inputStream);
+
+            // Print ETag
+            String etag = httpURLConnection.getHeaderField("ETag");
+            System.out.println("ETag from server: " + etag);
+
+            JsonParser jsonParser = new JsonParser();
+            JsonElement jsonElement = jsonParser.parse(response);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+            String jsonStr = gson.toJson(jsonElement);
+
+            File file = new File(filename);
+            PrintWriter printWriter = new PrintWriter(new FileWriter(file));
+            printWriter.print(jsonStr);
+            printWriter.flush();
+            printWriter.close();
+
+            System.out.println("Template retrieved and has been written to " + filename);
+        } else {
+            System.out.println(inputStreamToString(httpURLConnection.getErrorStream()));
+        }
+    }
+
+    /**
+     * Get current Firebase Remote Config template from server and get Etag required to upload new config.
+     *
+     * @throws IOException
+     */
+    private static String getTemplateETag() throws IOException {
+        HttpURLConnection httpURLConnection = getCommonConnection(BASE_URL + getEndpoint());
+        httpURLConnection.setRequestMethod("GET");
+        httpURLConnection.setRequestProperty("Accept-Encoding", "gzip");
+        int code = httpURLConnection.getResponseCode();
+        if (code == 200) {
+            String etag = httpURLConnection.getHeaderField("ETag");
+            System.out.println("ETag from server: " + etag);
+            return etag;
+        } else {
+            System.out.println(inputStreamToString(httpURLConnection.getErrorStream()));
+            throw new IOException();
+        }
+    }
+
+    /**
+     * Sends request with provided body as string.
+     *
+     * @throws IOException
+     */
     private static void performRequest(HttpURLConnection httpURLConnection, String body) throws IOException {
         GZIPOutputStream gzipOutputStream = new GZIPOutputStream(httpURLConnection.getOutputStream());
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(gzipOutputStream);
@@ -245,47 +172,14 @@ public class CommonUtils {
     }
 
     /**
-     * Read the Firebase Remote Config template from config.json file.
-     *
-     * @return String with contents of config.json file.
-     * @throws FileNotFoundException
-     */
-    public static String readConfig() throws FileNotFoundException {
-        File file = new File("config.json");
-        Scanner scanner = new Scanner(file);
-
-        StringBuilder stringBuilder = new StringBuilder();
-        while (scanner.hasNext()) {
-            stringBuilder.append(scanner.nextLine());
-        }
-        return stringBuilder.toString();
-    }
-
-    /**
      * Creates the Firebase Remote Config template from Config class.
      */
-    public static String createConfig()  {
-       return new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(new ConfigWrapper(config));
-    }
-
-    /**
-     * Format content from an InputStream as pretty JSON.
-     *
-     * @param inputStream Content to be formatted.
-     * @return Pretty JSON formatted string.
-     *
-     * @throws IOException
-     */
-    private static String inputstreamToPrettyString(InputStream inputStream) throws IOException {
-        String response = inputstreamToString(inputStream);
-
-        JsonParser jsonParser = new JsonParser();
-        JsonElement jsonElement = jsonParser.parse(response);
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        String jsonStr = gson.toJson(jsonElement);
-
-        return jsonStr;
+    private static String createConfig()  {
+       return new GsonBuilder()
+               .setPrettyPrinting()
+               .disableHtmlEscaping()
+               .create()
+               .toJson(new ConfigWrapper());
     }
 
     /**
@@ -295,7 +189,7 @@ public class CommonUtils {
      * @return String containing contents of InputStream.
      * @throws IOException
      */
-    private static String inputstreamToString(InputStream inputStream) throws IOException {
+    private static String inputStreamToString(InputStream inputStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         Scanner scanner = new Scanner(inputStream);
         while (scanner.hasNext()) {
@@ -314,24 +208,55 @@ public class CommonUtils {
         URL url = new URL(endpoint);
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
         try {
-            httpURLConnection.setRequestProperty("Authorization", "Bearer " + getAccessTokenFromEnvironment());
+            httpURLConnection.setRequestProperty("Authorization", "Bearer " + getAccessTokenOnCI());
         } catch (IOException e) {
-            httpURLConnection.setRequestProperty("Authorization", "Bearer " + getAccessToken());
+            httpURLConnection.setRequestProperty("Authorization", "Bearer " + getAccessTokenLocally());
         }
         httpURLConnection.setRequestProperty("Content-Type", "application/json; UTF-8");
         return httpURLConnection;
     }
 
-    public static boolean isJSONValid(String test) {
+    private static String getEndpoint() throws IOException {
+        String projectId;
         try {
-            new JSONObject(test);
-        } catch (JSONException ex) {
-            try {
-                new JSONArray(test);
-            } catch (JSONException ex1) {
-                return false;
-            }
+            projectId = getProjectIdLocally();
+        } catch (IOException e) {
+            projectId = getProjectIdOnCI();
         }
-        return true;
+        return "/v1/projects/" + projectId + "/remoteConfig";
+    }
+
+    private static String getAccessTokenLocally() throws IOException {
+        return refreshTokenBasedOn(LOCAL_SECRETS_FILENAME);
+    }
+
+    private static String getAccessTokenOnCI() throws IOException {
+        return refreshTokenBasedOn(CI_SECRETS_FILENAME);
+    }
+    private static String getProjectIdLocally() throws IOException {
+        return getFileContents(LOCAL_PROJECT_ID_FILENAME);
+    }
+
+    private static String getProjectIdOnCI() throws IOException {
+        return getFileContents(CI_PROJECT_ID_FILENAME);
+    }
+
+    private static String getFileContents(String pathName) throws IOException {
+        File file = new File(pathName);
+        Scanner scanner = new Scanner(file);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        while (scanner.hasNext()) {
+            stringBuilder.append(scanner.nextLine());
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String refreshTokenBasedOn(String filename) throws IOException {
+        GoogleCredential googleCredential = GoogleCredential
+                .fromStream(new FileInputStream(filename))
+                .createScoped(Arrays.asList(SCOPES));
+        googleCredential.refreshToken();
+        return googleCredential.getAccessToken();
     }
 }

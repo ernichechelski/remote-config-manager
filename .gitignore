@@ -23,3 +23,5 @@ hs_err_pid*
 build
 secrets.properties
 projectId.properties
+.gradle/6.6.1
+.gradle/buildOutputCleanup
