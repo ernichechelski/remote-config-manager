@@ -14,8 +14,6 @@ public class PullRequestTests {
 
     @Test
     void checkConfig() throws Exception {
-        if (!CommonUtils.isJSONValid(CommonUtils.createConfig())) {
-            throw new Exception("Config is not valid JSON!");
-        }
+        CommonUtils.checkConfig();
     }
 }

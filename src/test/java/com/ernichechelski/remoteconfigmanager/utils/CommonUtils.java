@@ -28,6 +28,17 @@ public class CommonUtils {
 
     private final static String[] SCOPES = { "https://www.googleapis.com/auth/firebase.remoteconfig" };
 
+    public static void checkConfig() throws Exception {
+        if (!CommonUtils.isJSONValid(CommonUtils.createConfig())) {
+            throw new Exception("Config is not valid JSON!");
+        }
+    }
+
+    public static void publishConfig() throws Exception {
+        String etag = CommonUtils.getTemplateETag();
+        CommonUtils.publishTemplate(etag);
+    }
+
     private static String getEndpoint() throws IOException {
         String projectId;
         try {

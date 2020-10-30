@@ -7,7 +7,7 @@ import com.ernichechelski.remoteconfigmanager.utils.ParameterContainer;
  */
 public class Config {
 
-    public ParameterContainer<String> text = new ParameterContainer("Remote config projectID");
+    public ParameterContainer<String> text = new ParameterContainer("Lorem ipsum");
 
     public ParameterContainer<Theme> theme = new ParameterContainer(new Theme());
 

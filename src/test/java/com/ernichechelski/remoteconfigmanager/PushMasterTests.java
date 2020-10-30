@@ -9,7 +9,6 @@ class PushMasterTests {
 
 	@Test
 	void uploadConfig() throws Exception {
-		String etag = CommonUtils.getTemplateETag();
-		CommonUtils.publishTemplate(etag);
+		CommonUtils.publishConfig();
 	}
 }
