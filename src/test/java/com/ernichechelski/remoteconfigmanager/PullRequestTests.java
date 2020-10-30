@@ -1,20 +1,20 @@
 package com.ernichechelski.remoteconfigmanager;
 
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.ernichechelski.remoteconfigmanager.utils.CommonUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
 
+/**
+ * This test is triggered on every pull request.
+ */
 @SpringBootTest
 public class PullRequestTests {
 
     @Test
     void checkConfig() throws Exception {
-        if (!CommonUtils.isJSONValid(CommonUtils.readConfig())) {
+        if (!CommonUtils.isJSONValid(CommonUtils.createConfig())) {
             throw new Exception("Config is not valid JSON!");
         }
     }

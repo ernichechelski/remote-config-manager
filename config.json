@@ -1,9 +1,0 @@
-{
-  "parameters": {
-    "text": {
-      "defaultValue": {
-        "value": "Hello cleaned parameter"
-      }
-    }
-  }
-}
