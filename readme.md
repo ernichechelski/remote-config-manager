@@ -1,6 +1,4 @@
-<img src="https://badgen.net/badge/Based on/Github Actions/gray?icon=github">
-<img src="https://badgen.net/badge/Based on/Spring Boot, JUnit/yellow?icon=github">
-<img src="https://badgen.net/badge/Based on/Firebase Remote Config/red?icon=github">
+<img src="https://badgen.net/badge/Based on/Github Actions/gray?icon=github"><img src="https://badgen.net/badge/Based on/Spring Boot, JUnit/yellow?icon=github"><img src="https://badgen.net/badge/Based on/Firebase Remote Config/red?icon=github">
 
 # Remote Config Manager
 
